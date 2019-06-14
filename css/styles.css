@@ -1,0 +1,230 @@
+/* FONT-FACE */
+
+@font-face {
+	font-family: "Forte";
+	src: url('/fonts/FORTE.TTF');
+}
+
+/* INDEX.PHP */
+
+body{
+    background-color: white;
+    background-image: url(/portail/images/fond.jpg);
+    background-attachment: fixed;
+}
+
+p, .text-white{
+    color: white;
+}
+ 
+.text-align{
+    text-align: center;
+}
+
+.text-left{
+    text-align: left;
+}
+
+.text-right{
+    text-align: right;
+}
+
+.Forte{
+    font-family: "Forte";
+}
+
+.ZaapInfo{
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.5);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 55%
+}
+
+.ZaapCenter{
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.headerTop{
+    padding: 25px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 101;
+}
+
+.footerBot{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.buttonColor{
+    margin-right: 8px;
+    margin-left: 8px;
+    font-size: 15px;
+}
+
+.carousel{
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    border: 4px #000 solid;
+    width: 60%;
+}
+
+.imageSlide{
+    width: 100%;
+}
+
+a.CarouselA{
+    text-decoration: none;
+}
+
+.shadowTexte{
+    text-shadow: 3px 3px 3px black;
+    font-size: 25px;
+}
+
+.fondColor{
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.solid{
+    border: 2px black solid;
+} 
+
+.imageEx{
+    margin: 5px;
+    transition: 1.20s;
+    -webkit-transition: 1.20s;
+    -moz-transition: 1.20s;
+    -ms-transition: 1.20s;
+    -o-transition: 1.20s;
+}
+  
+.imageEx:hover {
+    transition: 1.20s;
+    -webkit-transition: 1.20s;
+    -moz-transition: 1.20s;
+    -ms-transition: 1.20s;
+    -o-transition: 1.20s;
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg);
+} 
+
+.FondOpacity{
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* PORTAIL.PHP*/
+
+h4{
+    margin-top: 10px;
+    color: white;
+}
+
+.milieu{
+    position: relative;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%); 
+}
+
+.buttonBlock{
+    display: block;
+}
+
+.positonMilieu{
+    margin-top: 8px;
+}
+
+.BTNmilieu{
+    padding-bottom: 10px;
+}
+
+.hrSolid{
+    border: black 1px solid;
+}
+
+.EcartPosRep{
+    margin-bottom: 10px;
+}
+
+.espace10px{
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.border-radius{
+    border-radius: 20px;
+}
+
+.text-white-position{
+    text-shadow: 0 4px 0 #00ecff, 0 -4px 0 #ff4045;
+}
+
+.margin-bottom{
+    margin-bottom: 10px;
+}
+
+.sectionTaille {
+    margin-top: 20px;
+    height: 70px;
+}
+
+.dd-selected-text, .dd-option-text {
+  line-height: 45px !important;
+}
+
+.dd-selected { 
+    font-weight: normal !important; 
+}
+
+/* CONTACT.PHP*/
+
+.formMilieu{
+    text-align: center;
+    margin-top: 30px;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-bottom: 30px;
+}
+
+legend.scheduler-border {
+    width:inherit;
+    padding: 0 10px;
+    border-bottom:none;
+}
+
+fieldset.scheduler-border {
+    border: 3px groove #ddd !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow:  0px 0px 0px 0px #000;
+            box-shadow:  0px 0px 0px 0px #000;
+}
+
+.control-group{
+    margin: 10px;
+}
+
+.PoliceColorContact{
+    color: white;
+}
+
+/* COMPTE */
+
+.tailleMaxProgressBar{
+    width: 400px;
+}
+
+.modification{
+    text-align: center;
+    width: 55%;
+}
