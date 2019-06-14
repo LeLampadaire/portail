@@ -6,7 +6,7 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="icon" href="images/favicon.ico" />
-        <title><?php echo "$NomSite"; ?> - Compte</title>
+        <title><?php echo $NomSite; ?> - Compte</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -15,7 +15,7 @@
 
 <body>
     <!-- HEADER -->
-    <?php include('header.html'); ?>
+    <?php include('header.php'); ?>
     <!-- HEADER -->
 
     <br>
@@ -73,7 +73,7 @@
     </div>
 
     <!-- FOOTER -->
-    <?php include('footer.html'); ?>
+    <?php include('footer.php'); ?>
     <!-- FOOTER -->
 
 </body>

@@ -1,9 +1,11 @@
 <?php 
 
-    try{
-        $bdd = new PDO('mysql:host=localhost;dbname=portail;charset=utf8', 'root', '');
-    }catch(Exception $e){
-        die('Erreur : '.$e->getMessage());
+    $bdd = mysqli_connect("localhost", "root", "", "portail");
+
+    if(!$bdd){
+        echo "<div class='container'><div class='alert alert-danger' role='alert'>";
+        echo "Erreur connexion SQL !";
+        echo "</div></div>";
     }
 
 ?>

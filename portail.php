@@ -1,21 +1,101 @@
+<?php session_start();
+
+    $IdPseudo = 1;
+    $Pseudo = "Lampadaire";
+
+    require_once 'configuration.php';
+    require_once 'dbb_connexion.php';
+
+    $membres = mysqli_query($bdd, "SELECT id, pseudo FROM membres");
+
+    if(!empty($_POST['confirmation'])){
+        mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['confirmation'].';');
+        mysqli_query($bdd, 'UPDATE nidas_cpt SET validation = validation+1 WHERE id_pos='.$_POST['confirmation'].';');
+    }else if(!empty($_POST['report'])){
+        mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['report'].';');
+        mysqli_query($bdd, 'UPDATE nidas_cpt SET report = report+1 WHERE id_pos='.$_POST['report'].';');
+    }else if(!empty($_POST['valid'])){
+        $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM nidas WHERE id='.$_POST['valid'].';');
+        $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
+        if($_POST['utilisation'] == 0){
+            mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation'].', positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid'].';');
+        }else{
+            if($_POST['positionY'] == $recup['positionY'] AND $_POST['positionX'] == $recup['positionX']){
+                mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation'].', modificateur="'.$_POST['modificateur'].'" WHERE id='.$_POST['valid'].';');
+            }else{
+                mysqli_query($bdd, 'INSERT INTO nidas (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "enutrosor", '.$_POST['positionX'].', '.$_POST['positionY'].', '.$_POST['utilisation'].', "'.$_POST['modificateur'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
+                $valid = mysqli_query($bdd, 'SELECT id FROM nidas WHERE id=(SELECT MAX(id) FROM nidas);');
+                $valid = mysqli_fetch_array($valid, MYSQLI_ASSOC);
+                mysqli_query($bdd, 'INSERT INTO nidas_cpt(id, id_pos, validation, report) VALUES (NULL, '.$valid['id'].', 0, 0);');
+            }
+        }
+    }else if(!empty($_POST['inconnu'])){
+        mysqli_query($bdd, 'UPDATE nidas SET utilisation=0, positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu'].';');
+    }
+
+    function modificateur($modif){
+        if($modif == "PC"){
+            $return = "<img src='images/Modificateur/Puissance_cyclique.png' alt='PC'></img>";
+        }else if($modif == "LLP"){
+            $return = "<img src='images/Modificateur/Liaison_longue_portee.png' alt='LLP'></img>";
+        }else if($modif == "PR"){
+            $return = "<img src='images/Modificateur/Poussees_revigorantes.png' alt='PR'></img>";
+        }else if($modif == "DD"){
+            $return = "<img src='images/Modificateur/Disparitions_detonantes.png' alt='DD'></img>";
+        }else if($modif == "II"){
+            $return = "<img src='images/Modificateur/Invocations_incapacitantes.png' alt='II'></img>";
+        }else if($modif == "DI"){
+            $return = "<img src='images/Modificateur/Deplacements_incapacitants.png' alt='DI'></img>";
+        }else if($modif == "DM"){
+            $return = "<img src='images/Modificateur/Distance_Mesuree.png' alt='DM'></img>";
+        }else if($modif == "EB"){
+            $return = "<img src='images/Modificateur/Entraves_blessantes.png' alt='EB'></img>";
+        }else if($modif == "S"){
+            $return = "<img src='images/Modificateur/Solidaires.png' alt='S'></img>";
+        }else if($modif == "SR"){
+            $return = "<img src='images/Modificateur/Solitude_revigorante.png' alt='SR'></img>";
+        }else if($modif == "B"){
+            $return = "<img src='images/Modificateur/Berserker.png' alt='B'></img>";
+        }else if($modif == "COB"){
+            $return = "<img src='images/Modificateur/Coups_Bas.png' alt='COB'></img>";
+        }else if($modif == "E"){
+            $return = "<img src='images/Modificateur/Evasion.png' alt='E'></img>";
+        }else if($modif == "JD"){
+            $return = "<img src='images/Modificateur/Jeux_Dangeureux.png' alt='JD'></img>";
+        }else if($modif == "L"){
+            $return = "<img src='images/Modificateur/Larcin.png' alt='L'></img>";
+        }else if($modif == "AE"){
+            $return = "<img src='images/Modificateur/Actions_entravees.png' alt='AE'></img>";
+        }else if($modif == "QA"){
+            $return = "<img src='images/Modificateur/En_quete_d_action.png' alt='QA'></img>";
+        }else if($modif == "RA"){
+            $return = "<img src='images/Modificateur/Retour_Arriere.png' alt='RA'></img>";
+        }else if($modif == "SB"){
+            $return = "<img src='images/Modificateur/Saute_Bouftou.png' alt='SB'></img>";
+        }else if($modif == "SM"){
+            $return = "<img src='images/Modificateur/Solitude_momifiante.png' alt='SM'></img>";
+        }else if($modif == "RC"){
+            $return = "<img src='images/Modificateur/Régeneration_Critique.png' alt='RC'></img>";
+        }else if($modif == "RE"){
+            $return = "<img src='images/Modificateur/Roulette_Elementaire.png' alt='RE'></img>";
+        }else if($modif == "CB"){
+            $return = "<img src='images/Modificateur/Case_Bonus.png' alt='CB'></img>";
+        }else if($modif == "CP"){
+            $return = "<img src='images/Modificateur/Cible_Prioritaire.png' alt='CP'></img>";
+        }else if($modif == "BD"){
+            $return = "<img src='images/Modificateur/Bonne_distance.png' alt='BD'></img>";
+        }
+        echo $return;
+    }
+?>
+
 <!DOCTYPE html>
 <html>
-    <?php include 'configuration.php' ?>
-    <?php require 'dbb_connexion.php' ?>
-
-    <?php 
-    
-        $portail = $bdd->query("SELECT id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps FROM nidas ORDER BY id DESC");
-        $donnees_portail = $portail->fetch();
-        $membres = $bdd->query("SELECT id, pseudo FROM membres");
-
-    ?>
-
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="icon" href="images/favicon.ico" />
-        <title><?php echo "$NomSite"; ?> - Portail</title>
+        <title><?php echo $NomSite; ?> - Portail</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -30,7 +110,7 @@
 
 <body>
     <!-- HEADER -->
-    <?php include('header.html'); ?>
+    <?php include('header.php'); ?>
     <!-- HEADER -->
     
     <div class="container">
@@ -81,26 +161,33 @@
                 <h4>Actuellement :</h4>
                     <p class="text-center espace10pxBot">
                     <?php 
-                        if($donnees_portail['modificateur'] == "SB"){
-                            echo "<img src='images/Modificateur/Saute_Bouftou.png' alt='SB'></img>";
-                        }
+                        $enutrosor = mysqli_query($bdd, 'SELECT membres.id as id_membre, nidas.id as id_nidas, pseudo, positionX, positionY, utilisation, modificateur, id_membre, DATE_FORMAT(temps,"%d/%m/%Y %H:%i") as temps FROM nidas INNER JOIN membres ON(nidas.id_membre = membres.id) WHERE portail="enutrosor" ORDER BY nidas.id DESC');
+                        $enutrosor = mysqli_fetch_array($enutrosor, MYSQLI_ASSOC);
                     ?></p>
-                    <p class="text-center espace10pxBot"><?php echo "[" . $donnees_portail['positionX'] .",". $donnees_portail['positionY'] . "]" ; ?></p>
-                    <p class="text-center espace10pxBot"><?php echo "Posté a " . $donnees_portail['temps'] ?></p>
+                    <?php if($enutrosor['utilisation'] != 0){ ?>
+                        <?php modificateur($enutrosor['modificateur']); ?>
+                        <p class="text-center espace10pxBot"><?php echo "[" . $enutrosor['positionX'] .",". $enutrosor['positionY'] . "]" ; ?></p>
+                        <p class="text-center espace10pxBot"><?php echo $enutrosor['utilisation']." utilisations" ?></p>
+                        <p class="text-center espace10pxBot"><?php echo "Posté à " . $enutrosor['temps'] ?></p>
+                    <?php }else{ ?>
+                        <br><br><br><p class="text-center espace10pxBot">INCONNU</p>
+                    <?php } ?>
+                    
                 </div>
 
                 <div class="col-lg-3">
-                    <p class="milieu text-center espace10pxBot">
                     <?php 
-                        while($donnees_membre = $membres->fetch()){
-                            if($donnees_portail['id_membre'] == $donnees_membre['id']){
-                                echo $donnees_membre['pseudo'];
-                            }
-                        }
+                        $test = mysqli_query($bdd, 'SELECT * FROM nidas_cpt WHERE id_pos='.$enutrosor['id_nidas'].';');
+                        $test = mysqli_fetch_array($test, MYSQLI_ASSOC);
                     ?>
-                    </p><br><br><br><br>
-                    <button type="button" class="btn btn-success EcartPosRep">Confirmer la position</button>
-                    <button type="button" class="btn btn-danger">Report !</button>
+                    <p class="milieu text-center"><?php echo $enutrosor['pseudo']; ?></p>
+                    <button class="btn btn-outline-success"><?php echo $test['validation']; ?></button>
+                    <button class="btn btn-outline-danger"><?php echo $test['report']; ?></button>
+                    <br><br><br><br><br>
+                    <form action="" method="POST">
+                        <button type="submit" class="btn btn-success EcartPosRep" name="confirmation" value="<?php echo $enutrosor['id_nidas']; ?>">Confirmer la position</button>
+                        <button type="submit" class="btn btn-danger" name="report" value="<?php echo $enutrosor['id_nidas']; ?>">Report !</button>
+                    </form><br>
                 </div>
 
                 <div class="col-lg-5">
@@ -112,74 +199,82 @@
                             <span class="input-group-text">Nombres d'utilisations :</span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="input-group text-center positonMilieu">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">[</span>
-                                    <input type="text" aria-label="PosX" class="form-control">
-                                    <span class="input-group-text">,</span>
-                                    <input type="text" aria-label="PosY" class="form-control">
-                                    <span class="input-group-text">]</span>
+                        
+                    <form action="" method="POST">
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="input-group text-center positonMilieu">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">[</span>
+                                        <input type="text" aria-label="PosX" value="<?php echo $enutrosor['positionX']; ?>" class="form-control" name="positionX" required>
+                                        <span class="input-group-text">,</span>
+                                        <input type="text" aria-label="PosY" value="<?php echo $enutrosor['positionY']; ?>" class="form-control" name="positionY" required>
+                                        <span class="input-group-text">]</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="input-group text-center positonMilieu">
+                                    <input type="text" aria-label="Nombre" class="form-control" value="<?php if($enutrosor['utilisation'] != 0){ echo $enutrosor['utilisation']; } ?>" name="utilisation" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">restantes</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="input-group text-center positonMilieu">
-                                <input type="text" aria-label="Nombre" class="form-control">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">restantes</span>
-                                </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <section class="sectionTaille">
+                                    <select id="choixModificateurEnutrosor" name="modificateur">
+                                        <option selected="selected" data-img-src="images/Modificateur/Puissance_cyclique.png" value="PC">Puissance Cyclique</option>
+                                        <option data-img-src="images/Modificateur/Liaison_longue_portee.png" value="LLP">Liaison longue portee</option>
+                                        <option data-img-src="images/Modificateur/Poussees_revigorantes.png" value="PR">Poussées Revigorantes</option>
+                                        <option data-img-src="images/Modificateur/Disparitions_detonantes.png" value="DD">Disparitions Détonantes</option>
+                                        <option data-img-src="images/Modificateur/Invocations_incapacitantes.png" value="II">Invocations Incapacitantes</option>
+                                        <option data-img-src="images/Modificateur/Deplacements_incapacitants.png" value="DI">Déplacements incapacitants</option>
+                                        <option data-img-src="images/Modificateur/Distance_Mesuree.png" value="DM">Distance mesurée</option>
+                                        <option data-img-src="images/Modificateur/Entraves_blessantes.png" value="EB">Entraves blessantes</option>
+                                        <option data-img-src="images/Modificateur/Solidaires.png" value="S">Solidaires</option>
+                                        <option data-img-src="images/Modificateur/Solitude_revigorante.png" value="SR">Solitude revigorante</option>
+                                    </select>
+                                </section>
                             </div>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-lg-6 btn-group BTNmilieu">
+                                <button type="submit" class="btn btn-success" name="valid" value="<?php echo $enutrosor['id_nidas']; ?>">Validez la position !</button>
+                            </div>
+                            <div class="col-lg-6 btn-group BTNmilieu">
+                                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueEnutrosor">Position inconnue !</button>
 
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <section class="sectionTaille">
-                                <select id="choixModificateurEnutrosor">
-                                    <option selected="selected" data-img-src="images/Modificateur/Puissance_cyclique.png" value="PC">Puissance Cyclique</option>
-                                    <option data-img-src="images/Modificateur/Liaison_longue_portee.png" value="LLP">Liaison longue portee</option>
-                                    <option data-img-src="images/Modificateur/Poussees_revigorantes.png" value="PR">Poussées Revigorantes</option>
-                                    <option data-img-src="images/Modificateur/Disparitions_detonantes.png" value="DD">Disparitions Détonantes</option>
-                                    <option data-img-src="images/Modificateur/Invocations_incapacitantes.png" value="II">Invocations Incapacitantes</option>
-                                    <option data-img-src="images/Modificateur/Deplacements_incapacitants.png" value="DI">Déplacements incapacitants</option>
-                                    <option data-img-src="images/Modificateur/Distance_Mesuree.png" value="DM">Distance mesurée</option>
-                                    <option data-img-src="images/Modificateur/Entraves_blessantes.png" value="EB">Entraves blessantes</option>
-                                    <option data-img-src="images/Modificateur/Solidaires.png" value="S">Solidaires</option>
-                                    <option data-img-src="images/Modificateur/Solitude_revigorante.png" value="SR">Solitude revigorante</option>
-                                </select>
-                            </section>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-6 btn-group BTNmilieu">
-                            <button type="button" class="btn btn-success">Validez la position !</button>
-                        </div>
-                        <div class="col-lg-6 btn-group BTNmilieu">
-                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueEnutrosor">Position inconnue !</button>
-
-                            <div class="modal fade" id="PositionInconnueEnutrosor" tabindex="-1" role="dialog" aria-labelledby="PositionInconnueEnutrosorTitle" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="PositionInconnueEnutrosorTitle">Position inconnue</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Êtes-vous sûr que le portail "Enutrosor" n'existe plus ?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-primary">Je suis sûr !</button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                <div class="modal fade" id="PositionInconnueEnutrosor" tabindex="-1" role="dialog" aria-labelledby="PositionInconnueEnutrosorTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="PositionInconnueEnutrosorTitle">Position inconnue</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Êtes-vous sûr que le portail "Enutrosor" n'existe plus ?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="" method="POST">
+                                                    <button type="submit" class="btn btn-primary" name="inconnu" value="<?php echo $enutrosor['id_nidas']; ?>">Je suis sûr !</button>
+                                                </form>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -248,7 +343,7 @@
                                                 <option data-img-src="images/Modificateur/Disparitions_detonantes.png" value="DD">Disparitions Détonantes</option>
                                                 <option data-img-src="images/Modificateur/Invocations_incapacitantes.png" value="II">Invocations Incapacitantes</option>
                                                 <option data-img-src="images/Modificateur/Berserker.png" value="B">Berserker</option>
-                                                <option data-img-src="images/Modificateur/Coups_Bas.png" value="CB">Coups bas</option>
+                                                <option data-img-src="images/Modificateur/Coups_Bas.png" value="COB">Coups bas</option>
                                                 <option data-img-src="images/Modificateur/Evasion.png" value="E">Evasion</option>
                                                 <option data-img-src="images/Modificateur/Jeux_Dangeureux.png" value="JD">Jeux dangereux</option>
                                                 <option data-img-src="images/Modificateur/Larcin.png" value="L">Larcin</option>
@@ -499,7 +594,7 @@
           </div>
       
     <!-- FOOTER -->
-    <?php include('footer.html'); ?>
+    <?php include('footer.php'); ?>
     <!-- FOOTER -->
 
     <script>

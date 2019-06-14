@@ -1,12 +1,15 @@
+<?php session_start();
+
+    require_once 'configuration.php';
+    
+?>
 <!DOCTYPE html>
 <html>
-    <?php include 'configuration.php' ?>
-
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="icon" href="images/favicon.ico" />
-        <title><?php echo "$NomSite"; ?> - Accueil</title>
+        <title><?php echo $NomSite; ?> - Accueil</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -16,7 +19,7 @@
 
 <body>
     <!-- HEADER -->
-    <?php include('header.html'); ?>
+    <?php include('header.php'); ?>
     <!-- HEADER -->
 
     <br>
@@ -73,7 +76,7 @@
             <div class="card-body">
                 <p class="card-title text-align white Forte" style="font-size: 30px;">Informations sur le site : </p>
                 <p class="card-text text-align white">
-                    Le site <?php echo "$NomSite"; ?> a été réalisé par Lampadaire : <img src="images/lampadaire.png" alt="Lampadaire"><br>
+                    Le site <?php echo $NomSite; ?> a été réalisé par Lampadaire : <img src="images/lampadaire.png" alt="Lampadaire"><br>
                     <img src="images/memory.png" alt="Memory"> : Meneur de la guilde Memory du serveur Nidas : <img src="images/nidas.png" alt="Nidas"><br><br>
                     C'est un site totalement gratuit et mis votre disposition ! <br><br>
                     Dans la barre de navigation, <a href="portail.php" class="btn btn-primary btn-danger buttonColor"><img src="images/icons-32/compass.png"></span> Portail</a> est la page principalement utile du site !<br><br>
@@ -117,7 +120,7 @@
     <br>
 
     <!-- FOOTER -->
-    <?php include('footer.html'); ?>
+    <?php include('footer.php'); ?>
     <!-- FOOTER -->
     
     <script>
