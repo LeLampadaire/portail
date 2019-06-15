@@ -23,52 +23,6 @@
     <!-- HEADER -->
 
     <br>
-    <div id="carouselZaap" class="carousel slide d-none d-sm-block" data-ride="carousel"> <!-- Mettre des images 1920x1080 pour avoir une bonne qualitée -->
-        <ol class="carousel-indicators">
-            <li data-target="#carouselZaap" data-slide-to="0"></li>
-            <li data-target="#carouselZaap" data-slide-to="1" class="active"></li>
-            <li data-target="#carouselZaap" data-slide-to="2"></li>
-        </ol>
-        <div class="carousel-inner" style="width: auto; height: 600px;">
-            <div class="carousel-item">
-                <img src="images/map.jpg" alt="guilde" class="imageSlide">
-                <div class="carousel-caption d-none d-md-block shadowTexte" style="position: absolute; left: 0; top: 70%; width: 100%; text-align: center; font-size: 18px;">
-                    <a href="https://www.dofus.com/fr" alt="Dofus" class="CarouselA" target="_blank">
-                        <p style="font-size: 25px; font-weight: bolder;">Le monde de dofus</p>
-                        <p>Le monde de dofus est un grand univers !</p>
-                    </a>
-                </div>
-            </div>
-            <div class="carousel-item  active">
-                <img src="images/portail.jpg" alt="portail" class="imageSlide">
-                <div class="carousel-caption d-none d-md-block shadowTexte" style="position: absolute; left: 0; top: 70%; width: 100%; text-align: center; font-size: 18px;">
-                    <a href="portail.php" alt="Portail" class="CarouselA">
-                        <p style="font-size: 25px; font-weight: bolder;">Portail</p>
-                        <p>Liste des portails sur le site !</p>
-                    </a>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/bug.jpg" alt="serveur"  class="imageSlide">
-                <div class="carousel-caption d-none d-md-block shadowTexte" style="position: absolute; left: 0; top: 70%; width: 100%; text-align: center; font-size: 18px;">
-                    <a href="contact.php" alt="Contact" class="CarouselA">
-                        <p style="font-size: 25px; font-weight: bolder;">Bug</p>
-                        <p>Contactez-nous si vous rencontrez un bug !</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <a class="carousel-control-prev" href="#carouselZaap" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#carouselZaap" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
-    </div>
-
-    <br>
 
     <div class="row">
         <div class="col-lg-12 card mb-3 ZaapInfo solid">
@@ -88,7 +42,7 @@
                         <img alt="" target="_blank" src="https://www.paypal.com/fr_BE/i/scr/pixel.gif" width="1" height="1" />
                     </form>
                 </p>
-                <p class="card-text"><small class="text-muted">Dernière mise à jour : <?php echo "$MiseAJour"; ?></small></p>
+                <p class="card-text"><small class="text-muted">Dernière mise à jour : <?php echo $MiseAJour; ?></small></p>
             </div>
         </div>
     </div>
@@ -100,19 +54,19 @@
             <div class="col-lg-4">
                 <div class="container fondColor solid">
                     <img src="images/icons-128/iphone.png" alt="responsive" class="imageEx">
-                    <p>Un site responsive afin d'avoir toujours envie d'aller sur le site même avec son téléphone.</p>
+                    <p>Un site responsive afin d'avoir toujours envie d'y aller même avec son téléphone.</p>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="container fondColor solid">
                     <img src="images/icons-128/code.png" alt="maj" class="imageEx">
-                    <p>Des mises à jour seront disponibles sur le site.</p>
+                    <p>Des mises à jour seront toujours disponibles afin d'avoir une meilleur qualité.</p>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="container fondColor solid">
                     <img src="images/icons-128/user_circle.png" alt="ecoute" class="imageEx">
-                    <p>Le Web Developer est à l'écoute pour améliorer le site.</p>
+                    <p>Le Web Developer est à l'écoute pour des améliorations.</p>
                 </div>
             </div>
         </div>
@@ -122,35 +76,6 @@
     <!-- FOOTER -->
     <?php include('footer.php'); ?>
     <!-- FOOTER -->
-    
-    <script>
-        $(document).ready(function(){
-            // Activate Carousel
-            $("#carouselZaap").carousel();
-            
-            // Enable Carousel Indicators
-            $(".item1").click(function(){
-            $("#carouselZaap").carousel(0);
-            });
-            $(".item2").click(function(){
-            $("#carouselZaap").carousel(1);
-            });
-            $(".item3").click(function(){
-            $("#carouselZaap").carousel(2);
-            });
-            $(".item4").click(function(){
-            $("#carouselZaap").carousel(3);
-            });
-            
-            // Enable Carousel Controls
-            $(".left").click(function(){
-            $("#carouselZaap").carousel("prev");
-            });
-            $(".right").click(function(){
-            $("#carouselZaap").carousel("next");
-            });
-        });
-    </script>
 
 </body>
 </html>

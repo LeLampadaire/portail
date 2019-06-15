@@ -1,7 +1,7 @@
 ﻿<?php session_start();
 
-    $IdPseudo = 1;
-    $Pseudo = "Lampadaire";
+    $IdPseudo = $_SESSION['idprofil'];
+    $Pseudo = $_SESSION['pseudo'];
 
     require_once 'configuration.php';
     require_once 'dbb_connexion.php';
@@ -84,7 +84,7 @@
                             </div>
                         </div>
                         <div style="margin-top: -100px;">
-                            <p>Serveur : <?php echo $compte['serveur']; ?></p>
+                            <br>
                             <p>Date d'inscription : <?php echo $compte['date_inscription']; ?></p>
                             <p>Nombre de validation total : <?php echo $compte['valid']; ?></p>
                         </div>

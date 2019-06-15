@@ -1,103 +1,132 @@
 <?php session_start();
 
-    $IdPseudo = 1;
-    $Pseudo = "Lampadaire";
+    if(empty($_SESSION)){
+        $session = 0;
+        $IdPseudo = NULL;
+        $Pseudo = NULL;
+    }else{
+        $IdPseudo = $_SESSION['idprofil'];
+        $Pseudo = $_SESSION['pseudo'];
+        $session = 1;
+    }
 
     require_once 'configuration.php';
     require_once 'dbb_connexion.php';
 
-    if(!empty($_POST['confirmation-enutrosor'])){
-        mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET validation = validation+1 WHERE id_pos='.$_POST['confirmation-enutrosor'].';');
-    }else if(!empty($_POST['report-enutrosor'])){
-        mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET report = report+1 WHERE id_pos='.$_POST['report-enutrosor'].';');
-    }else if(!empty($_POST['valid-enutrosor'])){
-        $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM nidas WHERE id='.$_POST['valid-enutrosor'].';');
-        $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
-        if($_POST['utilisation-enutrosor'] == 0){
-            mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-enutrosor'].', positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-enutrosor'].';');
-        }else{
-            if($_POST['positionY-enutrosor'] == $recup['positionY'] AND $_POST['positionX-enutrosor'] == $recup['positionX']){
-                mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-enutrosor'].', modificateur="'.$_POST['modificateur-enutrosor'].'" WHERE id='.$_POST['valid-enutrosor'].';');
+    if($IdPseudo != NULL){
+        if(!empty($_POST['confirmation-enutrosor'])){
+            mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['confirmation-enutrosor'].', '.$IdPseudo.', 1);');
+        }else if(!empty($_POST['report-enutrosor'])){
+            mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['report-enutrosor'].', '.$IdPseudo.', 0);');
+        }else if(!empty($_POST['valid-enutrosor'])){
+            if($_POST['utilisation-enutrosor'] == 0){
+                mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-enutrosor'].', positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-enutrosor'].';');
             }else{
-                mysqli_query($bdd, 'INSERT INTO nidas (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "enutrosor", '.$_POST['positionX-enutrosor'].', '.$_POST['positionY-enutrosor'].', '.$_POST['utilisation-enutrosor'].', "'.$_POST['modificateur-enutrosor'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
-                $valid = mysqli_query($bdd, 'SELECT id FROM nidas WHERE id=(SELECT MAX(id) FROM nidas);');
-                $valid = mysqli_fetch_array($valid, MYSQLI_ASSOC);
-                mysqli_query($bdd, 'INSERT INTO nidas_cpt(id, id_pos, validation, report) VALUES (NULL, '.$valid['id'].', 0, 0);');
+                $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM ush WHERE id='.$_POST['valid-enutrosor'].';');
+                $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
+                if($_POST['positionY-enutrosor'] == $recup['positionY'] AND $_POST['positionX-enutrosor'] == $recup['positionX']){
+                    mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-enutrosor'].', modificateur="'.$_POST['modificateur-enutrosor'].'" WHERE id='.$_POST['valid-enutrosor'].';');
+                    if($_POST['modificateur-enutrosor'] == "NULL"){
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$_POST['valid-enutrosor'].';');
+                    }
+                }else{
+                    mysqli_query($bdd, 'INSERT INTO ush (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "enutrosor", '.$_POST['positionX-enutrosor'].', '.$_POST['positionY-enutrosor'].', '.$_POST['utilisation-enutrosor'].', "'.$_POST['modificateur-enutrosor'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
+                    if($_POST['modificateur-enutrosor'] == "NULL"){
+                        $tid = mysqli_query($bdd, 'SELECT id FROM ush WHERE id=(SELECT MAX(id) FROM ush) AND portail="enutrosor";');
+                        $tid = mysqli_fetch_array($tid, MYSQLI_ASSOC);
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$tid['id'].';');
+                    }
+                }
             }
-        }
-    }else if(!empty($_POST['inconnu-enutrosor'])){
-        mysqli_query($bdd, 'UPDATE nidas SET utilisation=0, positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-enutrosor'].';');
-    }else if(!empty($_POST['confirmation-srambad'])){
-        mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET validation = validation+1 WHERE id_pos='.$_POST['confirmation-srambad'].';');
-    }else if(!empty($_POST['report-srambad'])){
-        mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET report = report+1 WHERE id_pos='.$_POST['report-srambad'].';');
-    }else if(!empty($_POST['valid-srambad'])){
-        $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM nidas WHERE id='.$_POST['valid-srambad'].';');
-        $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
-        if($_POST['utilisation-srambad'] == 0){
-            mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-srambad'].', positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-srambad'].';');
-        }else{
-            if($_POST['positionY-srambad'] == $recup['positionY'] AND $_POST['positionX-srambad'] == $recup['positionX']){
-                mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-srambad'].', modificateur="'.$_POST['modificateur-srambad'].'" WHERE id='.$_POST['valid-srambad'].';');
+        }else if(!empty($_POST['inconnu-enutrosor'])){
+            mysqli_query($bdd, 'UPDATE ush SET utilisation=0, positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-enutrosor'].';');
+        }else if(!empty($_POST['confirmation-srambad'])){
+            mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['confirmation-srambad'].', '.$IdPseudo.', 1);');
+        }else if(!empty($_POST['report-srambad'])){
+            mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['report-srambad'].', '.$IdPseudo.', 0);');
+        }else if(!empty($_POST['valid-srambad'])){
+            if($_POST['utilisation-srambad'] == 0){
+                mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-srambad'].', positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-srambad'].';');
             }else{
-                mysqli_query($bdd, 'INSERT INTO nidas (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "srambad", '.$_POST['positionX-srambad'].', '.$_POST['positionY-srambad'].', '.$_POST['utilisation-srambad'].', "'.$_POST['modificateur-srambad'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
-                $valid = mysqli_query($bdd, 'SELECT id FROM nidas WHERE id=(SELECT MAX(id) FROM nidas);');
-                $valid = mysqli_fetch_array($valid, MYSQLI_ASSOC);
-                mysqli_query($bdd, 'INSERT INTO nidas_cpt(id, id_pos, validation, report) VALUES (NULL, '.$valid['id'].', 0, 0);');
+                $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM ush WHERE id='.$_POST['valid-srambad'].';');
+                $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
+                if($_POST['positionY-srambad'] == $recup['positionY'] AND $_POST['positionX-srambad'] == $recup['positionX']){
+                    mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-srambad'].', modificateur="'.$_POST['modificateur-srambad'].'" WHERE id='.$_POST['valid-srambad'].';');
+                    if($_POST['modificateur-srambad'] == "NULL"){
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$_POST['valid-srambad'].';');
+                    }
+                }else{
+                    mysqli_query($bdd, 'INSERT INTO ush (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "srambad", '.$_POST['positionX-srambad'].', '.$_POST['positionY-srambad'].', '.$_POST['utilisation-srambad'].', "'.$_POST['modificateur-srambad'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
+                    if($_POST['modificateur-srambad'] == "NULL"){
+                        $tid = mysqli_query($bdd, 'SELECT id FROM ush WHERE id=(SELECT MAX(id) FROM ush) AND portail="srambad";');
+                        $tid = mysqli_fetch_array($tid, MYSQLI_ASSOC);
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$tid['id'].';');
+                    }
+                }
             }
-        }
-    }else if(!empty($_POST['inconnu-srambad'])){
-        mysqli_query($bdd, 'UPDATE nidas SET utilisation=0, positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-srambad'].';');
-    }else if(!empty($_POST['confirmation-xelorium'])){
-        mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET validation = validation+1 WHERE id_pos='.$_POST['confirmation-xelorium'].';');
-    }else if(!empty($_POST['report-xelorium'])){
-        mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET report = report+1 WHERE id_pos='.$_POST['report-xelorium'].';');
-    }else if(!empty($_POST['valid-xelorium'])){
-        $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM nidas WHERE id='.$_POST['valid-xelorium'].';');
-        $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
-        if($_POST['utilisation-xelorium'] == 0){
-            mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-xelorium'].', positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-xelorium'].';');
-        }else{
-            if($_POST['positionY-xelorium'] == $recup['positionY'] AND $_POST['positionX-xelorium'] == $recup['positionX']){
-                mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-xelorium'].', modificateur="'.$_POST['modificateur-xelorium'].'" WHERE id='.$_POST['valid-xelorium'].';');
+        }else if(!empty($_POST['inconnu-srambad'])){
+            mysqli_query($bdd, 'UPDATE ush SET utilisation=0, positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-srambad'].';');
+        }else if(!empty($_POST['confirmation-xelorium'])){
+            mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['confirmation-xelorium'].', '.$IdPseudo.', 1);');
+        }else if(!empty($_POST['report-xelorium'])){
+            mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['report-xelorium'].', '.$IdPseudo.', 0);');
+        }else if(!empty($_POST['valid-xelorium'])){
+            if($_POST['utilisation-xelorium'] == 0){
+                mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-xelorium'].', positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-xelorium'].';');
             }else{
-                mysqli_query($bdd, 'INSERT INTO nidas (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "xelorium", '.$_POST['positionX-xelorium'].', '.$_POST['positionY-xelorium'].', '.$_POST['utilisation-xelorium'].', "'.$_POST['modificateur-xelorium'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
-                $valid = mysqli_query($bdd, 'SELECT id FROM nidas WHERE id=(SELECT MAX(id) FROM nidas);');
-                $valid = mysqli_fetch_array($valid, MYSQLI_ASSOC);
-                mysqli_query($bdd, 'INSERT INTO nidas_cpt(id, id_pos, validation, report) VALUES (NULL, '.$valid['id'].', 0, 0);');
+                $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM ush WHERE id='.$_POST['valid-xelorium'].';');
+                $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
+                if($_POST['positionY-xelorium'] == $recup['positionY'] AND $_POST['positionX-xelorium'] == $recup['positionX']){
+                    mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-xelorium'].', modificateur="'.$_POST['modificateur-xelorium'].'" WHERE id='.$_POST['valid-xelorium'].';');
+                    if($_POST['modificateur-xelorium'] == "NULL"){
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$_POST['valid-xelorium'].';');
+                    }
+                }else{
+                    mysqli_query($bdd, 'INSERT INTO ush (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "xelorium", '.$_POST['positionX-xelorium'].', '.$_POST['positionY-xelorium'].', '.$_POST['utilisation-xelorium'].', "'.$_POST['modificateur-xelorium'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
+                    if($_POST['modificateur-xelorium'] == "NULL"){
+                        $tid = mysqli_query($bdd, 'SELECT id FROM ush WHERE id=(SELECT MAX(id) FROM ush) AND portail="xelorium";');
+                        $tid = mysqli_fetch_array($tid, MYSQLI_ASSOC);
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$tid['id'].';');
+                    }
+                }
             }
-        }
-    }else if(!empty($_POST['inconnu-xelorium'])){
-        mysqli_query($bdd, 'UPDATE nidas SET utilisation=0, positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-xelorium'].';');
-    }else if(!empty($_POST['confirmation-ecaflipus'])){
-        mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET validation = validation+1 WHERE id_pos='.$_POST['confirmation-ecaflipus'].';');
-    }else if(!empty($_POST['report-ecaflipus'])){
-        mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
-        mysqli_query($bdd, 'UPDATE nidas_cpt SET report = report+1 WHERE id_pos='.$_POST['report-ecaflipus'].';');
-    }else if(!empty($_POST['valid-ecaflipus'])){
-        $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM nidas WHERE id='.$_POST['valid-ecaflipus'].';');
-        $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
-        if($_POST['utilisation-ecaflipus'] == 0){
-            mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-ecaflipus'].', positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-ecaflipus'].';');
-        }else{
-            if($_POST['positionY-ecaflipus'] == $recup['positionY'] AND $_POST['positionX-ecaflipus'] == $recup['positionX']){
-                mysqli_query($bdd, 'UPDATE nidas SET utilisation='.$_POST['utilisation-ecaflipus'].', modificateur="'.$_POST['modificateur-ecaflipus'].'" WHERE id='.$_POST['valid-ecaflipus'].';');
+        }else if(!empty($_POST['inconnu-xelorium'])){
+            mysqli_query($bdd, 'UPDATE ush SET utilisation=0, positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-xelorium'].';');
+        }else if(!empty($_POST['confirmation-ecaflipus'])){
+            mysqli_query($bdd, 'UPDATE membres SET validation_totale = validation_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['confirmation-ecaflipus'].', '.$IdPseudo.', 1);');
+        }else if(!empty($_POST['report-ecaflipus'])){
+            mysqli_query($bdd, 'UPDATE membres SET report_totale = report_totale+1 WHERE id='.$_POST['id_membre'].';');
+            mysqli_query($bdd, 'INSERT INTO ush_cpt(id, id_pos, id_membre, validation) VALUES(NULL, '.$_POST['report-ecaflipus'].', '.$IdPseudo.', 0);');
+        }else if(!empty($_POST['valid-ecaflipus'])){
+            if($_POST['utilisation-ecaflipus'] == 0){
+                mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-ecaflipus'].', positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['valid-ecaflipus'].';');
             }else{
-                mysqli_query($bdd, 'INSERT INTO nidas (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "ecaflipus", '.$_POST['positionX-ecaflipus'].', '.$_POST['positionY-ecaflipus'].', '.$_POST['utilisation-ecaflipus'].', "'.$_POST['modificateur-ecaflipus'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
-                $valid = mysqli_query($bdd, 'SELECT id FROM nidas WHERE id=(SELECT MAX(id) FROM nidas);');
-                $valid = mysqli_fetch_array($valid, MYSQLI_ASSOC);
-                mysqli_query($bdd, 'INSERT INTO nidas_cpt(id, id_pos, validation, report) VALUES (NULL, '.$valid['id'].', 0, 0);');
+                $recup = mysqli_query($bdd, 'SELECT positionX, positionY FROM ush WHERE id='.$_POST['valid-ecaflipus'].';');
+                $recup = mysqli_fetch_array($recup, MYSQLI_ASSOC);
+                if($_POST['positionY-ecaflipus'] == $recup['positionY'] AND $_POST['positionX-ecaflipus'] == $recup['positionX']){
+                    mysqli_query($bdd, 'UPDATE ush SET utilisation='.$_POST['utilisation-ecaflipus'].', modificateur="'.$_POST['modificateur-ecaflipus'].'" WHERE id='.$_POST['valid-ecaflipus'].';');
+                    if($_POST['modificateur-ecaflipus'] == "NULL"){
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$_POST['valid-ecaflipus'].';');
+                    }
+                }else{
+                    mysqli_query($bdd, 'INSERT INTO ush (id, portail, positionX, positionY, utilisation, modificateur, id_membre, temps) VALUES (NULL, "ecaflipus", '.$_POST['positionX-ecaflipus'].', '.$_POST['positionY-ecaflipus'].', '.$_POST['utilisation-ecaflipus'].', "'.$_POST['modificateur-ecaflipus'].'", '.$IdPseudo.', CURRENT_TIMESTAMP());');
+                    if($_POST['modificateur-ecaflipus'] == "NULL"){
+                        $tid = mysqli_query($bdd, 'SELECT id FROM ush WHERE id=(SELECT MAX(id) FROM ush) AND portail="ecaflipus";');
+                        $tid = mysqli_fetch_array($tid, MYSQLI_ASSOC);
+                        mysqli_query($bdd, 'UPDATE ush SET modificateur=NULL WHERE id='.$tid['id'].';');
+                    }
+                }
             }
+        }else if(!empty($_POST['inconnu-ecaflipus'])){
+            mysqli_query($bdd, 'UPDATE ush SET utilisation=0, positionX=NULL, positionY=NULL, modificateur=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-ecaflipus'].';');
         }
-    }else if(!empty($_POST['inconnu-ecaflipus'])){
-        mysqli_query($bdd, 'UPDATE nidas SET utilisation=0, positionX=NULL, positionY=NULL, id_membre='.$IdPseudo.' WHERE id='.$_POST['inconnu-ecaflipus'].';');
     }
 
     function modificateur($modif){
@@ -151,6 +180,8 @@
             $return = "<img src='images/Modificateur/Cible_Prioritaire.png' alt='CP'></img>";
         }else if($modif == "BD"){
             $return = "<img src='images/Modificateur/Bonne_distance.png' alt='BD'></img>";
+        }else if($modif == NULL){
+            $return = "<img src='images/Modificateur/inconnu.png' alt='inconnu'></img>";
         }
         echo $return;
     }
@@ -228,14 +259,21 @@
                 <h4>Actuellement :</h4>
                     <p class="text-center espace10pxBot">
                     <?php 
-                        $enutrosor = mysqli_query($bdd, 'SELECT nidas.id as id_nidas, pseudo, positionX, positionY, utilisation, modificateur, id_membre, DATE_FORMAT(temps,"%d/%m/%Y %H:%i") as temps FROM nidas INNER JOIN membres ON(nidas.id_membre = membres.id) WHERE portail="enutrosor" ORDER BY nidas.id DESC');
+                        $enutrosor = mysqli_query($bdd, 'SELECT ush.id as id_ush, pseudo, positionX, positionY, utilisation, modificateur, id_membre, TIMESTAMPDIFF(MINUTE,temps,NOW()) as temps FROM ush INNER JOIN membres ON(ush.id_membre = membres.id) WHERE portail="enutrosor" ORDER BY ush.id DESC');
                         $enutrosor = mysqli_fetch_array($enutrosor, MYSQLI_ASSOC);
+
+                        $temps = strftime("%Hh et %Mm", $enutrosor['temps'] * 60 );
+                        if($enutrosor['temps']*1 >= 1440 && $enutrosor['temps']*1 < 2880){
+                            $temps = "plus d'un jour.";
+                        }else if($enutrosor['temps']*1 >= 2880){
+                            $temps = "plus de 2 jours.";
+                        }
                     ?></p>
                     <?php if($enutrosor['utilisation'] != 0){ ?>
                         <?php modificateur($enutrosor['modificateur']); ?>
                         <p class="text-center espace10pxBot"><?php echo "[" . $enutrosor['positionX'] .",". $enutrosor['positionY'] . "]" ; ?></p>
                         <p class="text-center espace10pxBot"><?php echo $enutrosor['utilisation']." utilisations" ?></p>
-                        <p class="text-center espace10pxBot"><?php echo "Posté à " . $enutrosor['temps'] ?></p>
+                        <p class="text-center espace10pxBot"><?php echo "Il y a ".$temps; ?></p>
                     <?php }else{ ?>
                         <br><br><br><p class="text-center espace10pxBot">INCONNU</p>
                     <?php } ?>
@@ -244,25 +282,38 @@
 
                 <div class="col-lg-3">
                     <?php 
-                        if($enutrosor['id_nidas'] != NULL){
-                            $test = mysqli_query($bdd, 'SELECT * FROM nidas_cpt WHERE id_pos='.$enutrosor['id_nidas'].';');
-                            $test = mysqli_fetch_array($test, MYSQLI_ASSOC);
+                        if($enutrosor['id_ush'] != NULL){
+                            $test_valid = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$enutrosor['id_ush'].' AND validation=1;');
+                            $test_valid = mysqli_fetch_array($test_valid, MYSQLI_ASSOC);
+                            $test_report = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$enutrosor['id_ush'].' AND validation=0;');
+                            $test_report = mysqli_fetch_array($test_report, MYSQLI_ASSOC);
                             $disabled = 0;
                         }else{
-                            $test['validation'] = 0;
-                            $test['report'] = 0;
+                            $test_valid['validation'] = 0;
+                            $test_report['report'] = 0;
                             $disabled = 1;
                         }
                     ?>
                     <p class="milieu text-center"><?php echo $enutrosor['pseudo']; ?></p>
-                    <button class="btn btn-outline-success"><?php echo $test['validation']; ?></button>
-                    <button class="btn btn-outline-danger"><?php echo $test['report']; ?></button>
+                    <button class="btn btn-outline-success"><?php if(!$disabled){ echo $test_valid['nbr']; }else{ echo '0'; } ?></button>
+                    <button class="btn btn-outline-danger"><?php if(!$disabled){ echo $test_report['nbr']; }else{ echo '0'; } ?></button>
                     <br><br><br><br><br>
-                    <form action="" method="POST">
-                        <input type="hidden" value="<?php echo $enutrosor['id_membre']; ?>" name="id_membre">
-                        <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-enutrosor" value="<?php echo $enutrosor['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
-                        <button type="submit" class="btn btn-danger" name="report-enutrosor" value="<?php echo $enutrosor['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
-                    </form><br>
+                    <?php if($session == 1){
+                        if($enutrosor['id_ush'] != NULL){
+                            $droit = mysqli_query($bdd, 'SELECT * FROM ush_cpt WHERE id_pos='.$enutrosor['id_ush'].' AND id_membre='.$IdPseudo.';');
+                            $droit = mysqli_fetch_array($droit, MYSQLI_ASSOC);
+                        }else{
+                            $droit = 1;
+                        }
+                        
+                        if(!$droit){ ?>
+                            <form action="" method="POST">
+                                <input type="hidden" value="<?php echo $enutrosor['id_membre']; ?>" name="id_membre">
+                                <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-enutrosor" value="<?php echo $enutrosor['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
+                                <button type="submit" class="btn btn-danger" name="report-enutrosor" value="<?php echo $enutrosor['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
+                            </form><br>
+                        <?php } 
+                    } ?>
                 </div>
 
                 <div class="col-lg-5">
@@ -291,7 +342,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="input-group text-center positonMilieu">
-                                    <input type="text" aria-label="Nombre" class="form-control" value="<?php if($enutrosor['utilisation'] != 0){ echo $enutrosor['utilisation']; } ?>" name="utilisation-enutrosor" required>
+                                    <input type="number" aria-label="Nombre" class="form-control" min="0" max="124" value="<?php if($enutrosor['utilisation'] != 0){ echo $enutrosor['utilisation']; } ?>" name="utilisation-enutrosor" required>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">restantes</span>
                                     </div>
@@ -313,13 +364,14 @@
                                             <option data-img-src="images/Modificateur/Evasion.png" value="E" <?php if($enutrosor['modificateur'] == "E"){ echo 'selected'; } ?>>Evasion</option>
                                             <option data-img-src="images/Modificateur/Jeux_Dangeureux.png" value="JD" <?php if($enutrosor['modificateur'] == "JD"){ echo 'selected'; } ?>>Jeux dangereux</option>
                                             <option data-img-src="images/Modificateur/Larcin.png" value="L" <?php if($enutrosor['modificateur'] == "L"){ echo 'selected'; } ?>>Larcin</option>
+                                            <option data-img-src="images/Modificateur/inconnu.png" value="NULL" <?php if($enutrosor['modificateur'] == NULL){ echo 'selected'; } ?>>Inconnu</option>
                                         </select>
                                 </section>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-6 btn-group BTNmilieu">
-                                <button type="submit" class="btn btn-success" name="valid-enutrosor" value="<?php echo $enutrosor['id_nidas']; ?>">Validez la position !</button>
+                                <button type="submit" class="btn btn-success" name="valid-enutrosor" value="<?php if($enutrosor['id_ush'] != NULL){ echo $enutrosor['id_ush']; }else{ echo '-1'; }?>" <?php if($session == 0){ echo 'disabled'; } ?>>Validez la position !</button>
                             </div>
                             <div class="col-lg-6 btn-group BTNmilieu">
                                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueEnutrosor">Position inconnue !</button>
@@ -338,7 +390,7 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <form action="" method="POST">
-                                                    <button type="submit" class="btn btn-primary" name="inconnu-enutrosor" value="<?php echo $enutrosor['id_nidas']; ?>">Je suis sûr !</button>
+                                                    <button type="submit" class="btn btn-primary" name="inconnu-enutrosor" value="<?php echo $enutrosor['id_ush']; ?>" <?php if($session == 0){ echo 'disabled'; } ?>>Je suis sûr !</button>
                                                 </form>
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                                             </div>
@@ -370,14 +422,21 @@
                     <h4>Actuellement :</h4>
                         <p class="text-center espace10pxBot">
                         <?php 
-                            $srambad = mysqli_query($bdd, 'SELECT nidas.id as id_nidas, pseudo, positionX, positionY, utilisation, modificateur, id_membre, DATE_FORMAT(temps,"%d/%m/%Y %H:%i") as temps FROM nidas INNER JOIN membres ON(nidas.id_membre = membres.id) WHERE portail="srambad" ORDER BY nidas.id DESC');
+                            $srambad = mysqli_query($bdd, 'SELECT ush.id as id_ush, pseudo, positionX, positionY, utilisation, modificateur, id_membre, TIMESTAMPDIFF(MINUTE,temps,NOW()) as temps FROM ush INNER JOIN membres ON(ush.id_membre = membres.id) WHERE portail="srambad" ORDER BY ush.id DESC');
                             $srambad = mysqli_fetch_array($srambad, MYSQLI_ASSOC);
+
+                            $temps = strftime("%Hh et %Mm", $srambad['temps'] * 60 );
+                            if($srambad['temps']*1 >= 1440 && $srambad['temps']*1 < 2880){
+                                $temps = "plus d'un jour.";
+                            }else if($srambad['temps']*1 >= 2880){
+                                $temps = "plus de 2 jours.";
+                            }
                         ?></p>
                         <?php if($srambad['utilisation'] != 0){ ?>
                             <?php modificateur($srambad['modificateur']); ?>
                             <p class="text-center espace10pxBot"><?php echo "[" . $srambad['positionX'] .",". $srambad['positionY'] . "]" ; ?></p>
                             <p class="text-center espace10pxBot"><?php echo $srambad['utilisation']." utilisations" ?></p>
-                            <p class="text-center espace10pxBot"><?php echo "Posté à " . $srambad['temps'] ?></p>
+                            <p class="text-center espace10pxBot"><?php echo "Il y a ".$temps; ?></p>
                         <?php }else{ ?>
                             <br><br><br><p class="text-center espace10pxBot">INCONNU</p>
                         <?php } ?>
@@ -386,25 +445,38 @@
 
                     <div class="col-lg-3">
                         <?php 
-                            if($srambad['id_nidas'] != NULL){
-                                $test = mysqli_query($bdd, 'SELECT * FROM nidas_cpt WHERE id_pos='.$srambad['id_nidas'].';');
-                                $test = mysqli_fetch_array($test, MYSQLI_ASSOC);
+                            if($srambad['id_ush'] != NULL){
+                                $test_valid = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$srambad['id_ush'].' AND validation=1;');
+                                $test_valid = mysqli_fetch_array($test_valid, MYSQLI_ASSOC);
+                                $test_report = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$srambad['id_ush'].' AND validation=0;');
+                                $test_report = mysqli_fetch_array($test_report, MYSQLI_ASSOC);
                                 $disabled = 0;
                             }else{
-                                $test['validation'] = 0;
-                                $test['report'] = 0;
+                                $test_valid['validation'] = 0;
+                                $test_report['report'] = 0;
                                 $disabled = 1;
                             }
                         ?>
                         <p class="milieu text-center"><?php echo $srambad['pseudo']; ?></p>
-                        <button class="btn btn-outline-success"><?php echo $test['validation']; ?></button>
-                        <button class="btn btn-outline-danger"><?php echo $test['report']; ?></button>
+                        <button class="btn btn-outline-success"><?php if(!$disabled){ echo $test_valid['nbr']; }else{ echo '0'; } ?></button>
+                        <button class="btn btn-outline-danger"><?php if(!$disabled){ echo $test_report['nbr']; }else{ echo '0'; } ?></button>
                         <br><br><br><br><br>
-                        <form action="" method="POST">
-                            <input type="hidden" value="<?php echo $srambad['id_membre']; ?>" name="id_membre">
-                            <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-srambad" value="<?php echo $srambad['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
-                            <button type="submit" class="btn btn-danger" name="report-srambad" value="<?php echo $srambad['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
-                        </form><br>
+                        <?php if($session == 1){
+                            if($srambad['id_ush'] != NULL){
+                                $droit = mysqli_query($bdd, 'SELECT * FROM ush_cpt WHERE id_pos='.$srambad['id_ush'].' AND id_membre='.$IdPseudo.';');
+                                $droit = mysqli_fetch_array($droit, MYSQLI_ASSOC);
+                            }else{
+                                $droit = 1;
+                            }
+
+                            if(!$droit){ ?>
+                                <form action="" method="POST">
+                                    <input type="hidden" value="<?php echo $srambad['id_membre']; ?>" name="id_membre">
+                                    <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-srambad" value="<?php echo $srambad['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
+                                    <button type="submit" class="btn btn-danger" name="report-srambad" value="<?php echo $srambad['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
+                                </form><br>
+                            <?php } 
+                        } ?>
                     </div>
 
                     <div class="col-lg-5">
@@ -433,7 +505,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="input-group text-center positonMilieu">
-                                        <input type="text" aria-label="Nombre" class="form-control" value="<?php if($srambad['utilisation'] != 0){ echo $srambad['utilisation']; } ?>" name="utilisation-srambad" required>
+                                        <input type="number" aria-label="Nombre" class="form-control" min="0" max="124" value="<?php if($srambad['utilisation'] != 0){ echo $srambad['utilisation']; } ?>" name="utilisation-srambad" required>
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">restantes</span>
                                         </div>
@@ -455,13 +527,14 @@
                                             <option data-img-src="images/Modificateur/Entraves_blessantes.png" value="EB" <?php if($srambad['modificateur'] == "EB"){ echo 'selected'; } ?>>Entraves blessantes</option>
                                             <option data-img-src="images/Modificateur/Solidaires.png" value="S" <?php if($srambad['modificateur'] == "S"){ echo 'selected'; } ?>>Solidaires</option>
                                             <option data-img-src="images/Modificateur/Solitude_revigorante.png" value="SR" <?php if($srambad['modificateur'] == "SR"){ echo 'selected'; } ?>>Solitude revigorante</option>
+                                            <option data-img-src="images/Modificateur/inconnu.png" value="NULL" <?php if($srambad['modificateur'] == NULL){ echo 'selected'; } ?>>Inconnu</option>
                                         </select>
                                     </section>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 btn-group BTNmilieu">
-                                    <button type="submit" class="btn btn-success" name="valid-srambad" value="<?php echo $srambad['id_nidas']; ?>">Validez la position !</button>
+                                    <button type="submit" class="btn btn-success" name="valid-srambad" value="<?php if($srambad['id_ush'] != NULL){ echo $srambad['id_ush']; }else{ echo '-1'; }?>" <?php if($session == 0){ echo 'disabled'; } ?>>Validez la position !</button>
                                 </div>
                                 <div class="col-lg-6 btn-group BTNmilieu">
                                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueSrambad">Position inconnue !</button>
@@ -480,7 +553,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <form action="" method="POST">
-                                                        <button type="submit" class="btn btn-primary" name="inconnu-srambad" value="<?php echo $srambad['id_nidas']; ?>">Je suis sûr !</button>
+                                                        <button type="submit" class="btn btn-primary" name="inconnu-srambad" value="<?php echo $srambad['id_ush']; ?>" <?php if($session == 0){ echo 'disabled'; } ?>>Je suis sûr !</button>
                                                     </form>
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                                                 </div>
@@ -512,14 +585,21 @@
                     <h4>Actuellement :</h4>
                         <p class="text-center espace10pxBot">
                         <?php 
-                            $xelorium = mysqli_query($bdd, 'SELECT nidas.id as id_nidas, pseudo, positionX, positionY, utilisation, modificateur, id_membre, DATE_FORMAT(temps,"%d/%m/%Y %H:%i") as temps FROM nidas INNER JOIN membres ON(nidas.id_membre = membres.id) WHERE portail="xelorium" ORDER BY nidas.id DESC');
+                            $xelorium = mysqli_query($bdd, 'SELECT ush.id as id_ush, pseudo, positionX, positionY, utilisation, modificateur, id_membre, TIMESTAMPDIFF(MINUTE,temps,NOW()) as temps FROM ush INNER JOIN membres ON(ush.id_membre = membres.id) WHERE portail="xelorium" ORDER BY ush.id DESC');
                             $xelorium = mysqli_fetch_array($xelorium, MYSQLI_ASSOC);
+
+                            $temps = strftime("%Hh et %Mm", $xelorium['temps'] * 60 );
+                            if($xelorium['temps']*1 >= 1440 && $xelorium['temps']*1 < 2880){
+                                $temps = "plus d'un jour.";
+                            }else if($xelorium['temps']*1 >= 2880){
+                                $temps = "plus de 2 jours.";
+                            }
                         ?></p>
                         <?php if($xelorium['utilisation'] != 0){ ?>
                             <?php modificateur($xelorium['modificateur']); ?>
                             <p class="text-center espace10pxBot"><?php echo "[" . $xelorium['positionX'] .",". $xelorium['positionY'] . "]" ; ?></p>
                             <p class="text-center espace10pxBot"><?php echo $xelorium['utilisation']." utilisations" ?></p>
-                            <p class="text-center espace10pxBot"><?php echo "Posté à " . $xelorium['temps'] ?></p>
+                            <p class="text-center espace10pxBot"><?php echo "Il y a ".$temps; ?></p>
                         <?php }else{ ?>
                             <br><br><br><p class="text-center espace10pxBot">INCONNU</p>
                         <?php } ?>
@@ -528,25 +608,38 @@
 
                     <div class="col-lg-3">
                         <?php 
-                            if($xelorium['id_nidas'] != NULL){
-                                $test = mysqli_query($bdd, 'SELECT * FROM nidas_cpt WHERE id_pos='.$xelorium['id_nidas'].';');
-                                $test = mysqli_fetch_array($test, MYSQLI_ASSOC);
+                            if($xelorium['id_ush'] != NULL){
+                                $test_valid = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$xelorium['id_ush'].' AND validation=1;');
+                                $test_valid = mysqli_fetch_array($test_valid, MYSQLI_ASSOC);
+                                $test_report = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$xelorium['id_ush'].' AND validation=0;');
+                                $test_report = mysqli_fetch_array($test_report, MYSQLI_ASSOC);
                                 $disabled = 0;
                             }else{
-                                $test['validation'] = 0;
-                                $test['report'] = 0;
+                                $test_valid['validation'] = 0;
+                                $test_report['report'] = 0;
                                 $disabled = 1;
                             }
                         ?>
                         <p class="milieu text-center"><?php echo $xelorium['pseudo']; ?></p>
-                        <button class="btn btn-outline-success"><?php echo $test['validation']; ?></button>
-                        <button class="btn btn-outline-danger"><?php echo $test['report']; ?></button>
+                        <button class="btn btn-outline-success"><?php if(!$disabled){ echo $test_valid['nbr']; }else{ echo '0'; } ?></button>
+                        <button class="btn btn-outline-danger"><?php if(!$disabled){ echo $test_report['nbr']; }else{ echo '0'; } ?></button>
                         <br><br><br><br><br>
-                        <form action="" method="POST">
-                            <input type="hidden" value="<?php echo $xelorium['id_membre']; ?>" name="id_membre">
-                            <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-xelorium" value="<?php echo $xelorium['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
-                            <button type="submit" class="btn btn-danger" name="report-xelorium" value="<?php echo $xelorium['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
-                        </form><br>
+                        <?php if($session == 1){
+                            if($xelorium['id_ush'] != NULL){
+                                $droit = mysqli_query($bdd, 'SELECT * FROM ush_cpt WHERE id_pos='.$xelorium['id_ush'].' AND id_membre='.$IdPseudo.';');
+                                $droit = mysqli_fetch_array($droit, MYSQLI_ASSOC);
+                            }else{
+                                $droit = 1;
+                            }
+
+                            if(!$droit){ ?>
+                                <form action="" method="POST">
+                                    <input type="hidden" value="<?php echo $xelorium['id_membre']; ?>" name="id_membre">
+                                    <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-xelorium" value="<?php echo $xelorium['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
+                                    <button type="submit" class="btn btn-danger" name="report-xelorium" value="<?php echo $xelorium['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
+                                </form><br>
+                            <?php } 
+                        } ?>
                     </div>
 
                     <div class="col-lg-5">
@@ -575,7 +668,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="input-group text-center positonMilieu">
-                                        <input type="text" aria-label="Nombre" class="form-control" value="<?php if($xelorium['utilisation'] != 0){ echo $xelorium['utilisation']; } ?>" name="utilisation-xelorium" required>
+                                        <input type="number" aria-label="Nombre" class="form-control" min="0" max="124" value="<?php if($xelorium['utilisation'] != 0){ echo $xelorium['utilisation']; } ?>" name="utilisation-xelorium" required>
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">restantes</span>
                                         </div>
@@ -597,13 +690,14 @@
                                                 <option data-img-src="images/Modificateur/Retour_Arriere.png" value="RA" <?php if($xelorium['modificateur'] == "RA"){ echo 'selected'; } ?>>Retour arrière</option>
                                                 <option data-img-src="images/Modificateur/Saute_Bouftou.png" value="SB" <?php if($xelorium['modificateur'] == "SB"){ echo 'selected'; } ?>>Saute-Bouftou</option>
                                                 <option data-img-src="images/Modificateur/Solitude_momifiante.png" value="SM" <?php if($xelorium['modificateur'] == "SM"){ echo 'selected'; } ?>>Solitude momifiante</option>
+                                            <option data-img-src="images/Modificateur/inconnu.png" value="NULL" <?php if($xelorium['modificateur'] == NULL){ echo 'selected'; } ?>>Inconnu</option>
                                         </select>
                                     </section>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 btn-group BTNmilieu">
-                                    <button type="submit" class="btn btn-success" name="valid-xelorium" value="<?php echo $xelorium['id_nidas']; ?>">Validez la position !</button>
+                                    <button type="submit" class="btn btn-success" name="valid-xelorium" value="<?php if($xelorium['id_ush'] != NULL){ echo $xelorium['id_ush']; }else{ echo '-1'; }?>" <?php if($session == 0){ echo 'disabled'; } ?>>Validez la position !</button>
                                 </div>
                                 <div class="col-lg-6 btn-group BTNmilieu">
                                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueXelorium">Position inconnue !</button>
@@ -622,7 +716,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <form action="" method="POST">
-                                                        <button type="submit" class="btn btn-primary" name="inconnu-xelorium" value="<?php echo $xelorium['id_nidas']; ?>">Je suis sûr !</button>
+                                                        <button type="submit" class="btn btn-primary" name="inconnu-xelorium" value="<?php echo $xelorium['id_ush']; ?>" <?php if($session == 0){ echo 'disabled'; } ?>>Je suis sûr !</button>
                                                     </form>
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                                                 </div>
@@ -654,14 +748,21 @@
                     <h4>Actuellement :</h4>
                         <p class="text-center espace10pxBot">
                         <?php 
-                            $ecaflipus = mysqli_query($bdd, 'SELECT nidas.id as id_nidas, pseudo, positionX, positionY, utilisation, modificateur, id_membre, DATE_FORMAT(temps,"%d/%m/%Y %H:%i") as temps FROM nidas INNER JOIN membres ON(nidas.id_membre = membres.id) WHERE portail="ecaflipus" ORDER BY nidas.id DESC');
+                            $ecaflipus = mysqli_query($bdd, 'SELECT ush.id as id_ush, pseudo, positionX, positionY, utilisation, modificateur, id_membre, TIMESTAMPDIFF(MINUTE,temps,NOW()) as temps FROM ush INNER JOIN membres ON(ush.id_membre = membres.id) WHERE portail="ecaflipus" ORDER BY ush.id DESC');
                             $ecaflipus = mysqli_fetch_array($ecaflipus, MYSQLI_ASSOC);
+
+                            $temps = strftime("%Hh et %Mm", $ecaflipus['temps'] * 60 );
+                            if($ecaflipus['temps']*1 >= 1440 && $ecaflipus['temps']*1 < 2880){
+                                $temps = "plus d'un jour.";
+                            }else if($ecaflipus['temps']*1 >= 2880){
+                                $temps = "plus de 2 jours.";
+                            }
                         ?></p>
                         <?php if($ecaflipus['utilisation'] != 0){ ?>
                             <?php modificateur($ecaflipus['modificateur']); ?>
                             <p class="text-center espace10pxBot"><?php echo "[" . $ecaflipus['positionX'] .",". $ecaflipus['positionY'] . "]" ; ?></p>
                             <p class="text-center espace10pxBot"><?php echo $ecaflipus['utilisation']." utilisations" ?></p>
-                            <p class="text-center espace10pxBot"><?php echo "Posté à " . $ecaflipus['temps'] ?></p>
+                            <p class="text-center espace10pxBot"><?php echo "Il y a ".$temps; ?></p>
                         <?php }else{ ?>
                             <br><br><br><p class="text-center espace10pxBot">INCONNU</p>
                         <?php } ?>
@@ -670,25 +771,38 @@
 
                     <div class="col-lg-3">
                         <?php 
-                            if($ecaflipus['id_nidas'] != NULL){
-                                $test = mysqli_query($bdd, 'SELECT * FROM nidas_cpt WHERE id_pos='.$ecaflipus['id_nidas'].';');
-                                $test = mysqli_fetch_array($test, MYSQLI_ASSOC);
+                            if($ecaflipus['id_ush'] != NULL){
+                                $test_valid = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$ecaflipus['id_ush'].' AND validation=1;');
+                                $test_valid = mysqli_fetch_array($test_valid, MYSQLI_ASSOC);
+                                $test_report = mysqli_query($bdd, 'SELECT COUNT(validation) as nbr FROM ush_cpt WHERE id_pos='.$ecaflipus['id_ush'].' AND validation=0;');
+                                $test_report = mysqli_fetch_array($test_report, MYSQLI_ASSOC);
                                 $disabled = 0;
                             }else{
-                                $test['validation'] = 0;
-                                $test['report'] = 0;
+                                $test_valid['validation'] = 0;
+                                $test_report['report'] = 0;
                                 $disabled = 1;
                             }
                         ?>
                         <p class="milieu text-center"><?php echo $ecaflipus['pseudo']; ?></p>
-                        <button class="btn btn-outline-success"><?php echo $test['validation']; ?></button>
-                        <button class="btn btn-outline-danger"><?php echo $test['report']; ?></button>
+                        <button class="btn btn-outline-success"><?php if(!$disabled){ echo $test_valid['nbr']; }else{ echo '0'; } ?></button>
+                        <button class="btn btn-outline-danger"><?php if(!$disabled){ echo $test_report['nbr']; }else{ echo '0'; } ?></button>
                         <br><br><br><br><br>
-                        <form action="" method="POST">
-                            <input type="hidden" value="<?php echo $ecaflipus['id_membre']; ?>" name="id_membre">
-                            <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-ecaflipus" value="<?php echo $ecaflipus['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
-                            <button type="submit" class="btn btn-danger" name="report-ecaflipus" value="<?php echo $ecaflipus['id_nidas']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
-                        </form><br>
+                        <?php if($session == 1){
+                            if($ecaflipus['id_ush'] != NULL){
+                                $droit = mysqli_query($bdd, 'SELECT * FROM ush_cpt WHERE id_pos='.$ecaflipus['id_ush'].' AND id_membre='.$IdPseudo.';');
+                                $droit = mysqli_fetch_array($droit, MYSQLI_ASSOC);
+                            }else{
+                                $droit = 1;
+                            }
+
+                            if(!$droit){ ?>
+                                <form action="" method="POST">
+                                    <input type="hidden" value="<?php echo $ecaflipus['id_membre']; ?>" name="id_membre">
+                                    <button type="submit" class="btn btn-success EcartPosRep" name="confirmation-ecaflipus" value="<?php echo $ecaflipus['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Confirmer la position</button>
+                                    <button type="submit" class="btn btn-danger" name="report-ecaflipus" value="<?php echo $ecaflipus['id_ush']; ?>" <?php if($disabled){ echo 'disabled'; } ?>>Report !</button>
+                                </form><br>
+                            <?php } 
+                        } ?>
                     </div>
 
                     <div class="col-lg-5">
@@ -717,7 +831,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="input-group text-center positonMilieu">
-                                        <input type="text" aria-label="Nombre" class="form-control" value="<?php if($ecaflipus['utilisation'] != 0){ echo $ecaflipus['utilisation']; } ?>" name="utilisation-ecaflipus" required>
+                                        <input type="number" aria-label="Nombre" class="form-control" min="0" max="124" value="<?php if($ecaflipus['utilisation'] != 0){ echo $ecaflipus['utilisation']; } ?>" name="utilisation-ecaflipus" required>
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">restantes</span>
                                         </div>
@@ -739,13 +853,14 @@
                                                 <option data-img-src="images/Modificateur/Case_Bonus.png" value="CB" <?php if($ecaflipus['modificateur'] == "CB"){ echo 'selected'; } ?>>Case Bonus</option>
                                                 <option data-img-src="images/Modificateur/Cible_Prioritaire.png" value="CP" <?php if($ecaflipus['modificateur'] == "CP"){ echo 'selected'; } ?>>Cible prioritaire</option>
                                                 <option data-img-src="images/Modificateur/Bonne_distance.png" value="BD" <?php if($ecaflipus['modificateur'] == "BD"){ echo 'selected'; } ?>>Bonne distance</option>
+                                            <option data-img-src="images/Modificateur/inconnu.png" value="NULL" <?php if($ecaflipus['modificateur'] == NULL){ echo 'selected'; } ?>>Inconnu</option>
                                         </select>
                                     </section>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 btn-group BTNmilieu">
-                                    <button type="submit" class="btn btn-success" name="valid-ecaflipus" value="<?php echo $ecaflipus['id_nidas']; ?>">Validez la position !</button>
+                                    <button type="submit" class="btn btn-success" name="valid-ecaflipus" value="<?php if($ecaflipus['id_ush'] != NULL){ echo $ecaflipus['id_ush']; }else{ echo '-1'; }?>" <?php if($session == 0){ echo 'disabled'; } ?>>Validez la position !</button>
                                 </div>
                                 <div class="col-lg-6 btn-group BTNmilieu">
                                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#PositionInconnueEcaflipus">Position inconnue !</button>
@@ -764,7 +879,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <form action="" method="POST">
-                                                        <button type="submit" class="btn btn-primary" name="inconnu-ecaflipus" value="<?php echo $ecaflipus['id_nidas']; ?>">Je suis sûr !</button>
+                                                        <button type="submit" class="btn btn-primary" name="inconnu-ecaflipus" value="<?php echo $ecaflipus['id_ush']; ?>" <?php if($session == 0){ echo 'disabled'; } ?>>Je suis sûr !</button>
                                                     </form>
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                                                 </div>
@@ -783,7 +898,10 @@
     </div>
       
     <!-- FOOTER -->
-    <?php include('footer.php'); ?>
+    <?php 
+        include('footer.php'); 
+        mysqli_close($bdd);
+    ?>
     <!-- FOOTER -->
 
     <script>
