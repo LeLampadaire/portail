@@ -212,8 +212,8 @@
     <!-- HEADER -->
     
     <div class="container">
-        <h1 class="display-3 text-center text-white-position Forte">Position des portails</h1>
-        <p class="lead text-center">C'est un simple site pour afficher la position des portails grâce aux utilisateurs.</p>
+        <h1 class="display-3 text-center text-white-position Forte">Ush</h1>
+        <p class="lead text-center">C'est un simple site pour afficher la Position des portails grâce aux utilisateurs.</p>
         <hr class="my-4 hrSolid">
         <div class="alert alert-danger text-center" role="alert">Merci de ne pas mettre des positions inutiles ou corompues sous peine de ban.</div>
         <div class="text-right">
