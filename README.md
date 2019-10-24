@@ -43,4 +43,9 @@ Site web répertoriant les positions des portails indiquées par les membres du 
 
 => Si l'image ne change pas, faites CTRL+F5 !
 
+### Se connecter
+- Nom de compte : Lampadaire, Zetrox
+- Mot de passe : admin
+
+## Screen
 ![Portail](https://user-images.githubusercontent.com/41271314/67411789-7494a200-f5be-11e9-886b-8f2f65dd1f7f.PNG)
