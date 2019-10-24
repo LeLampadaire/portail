@@ -359,8 +359,8 @@ CREATE TABLE IF NOT EXISTS `membres` (
 --
 
 INSERT INTO `membres` (`id`, `pseudo`, `mdp`, `serveur`, `photo`, `fond`, `validation_totale`, `report_totale`, `date_inscription`) VALUES
-(1, 'Lampadaire', 'abe69765e701f25195cb17989da92a81', 'Nidas', '1.png', 'FecaM.jpg', 20, 6, '2019-02-05 14:48:13'),
-(2, 'Zetrox', 'a899fc1b2db6eec48675fb1db13bb4e4', 'Nidas', 'null.png', 'SramM.jpg', 7, 2, '2019-06-15 00:00:00');
+(1, 'Lampadaire', '21232f297a57a5a743894a0e4a801fc3', 'Nidas', '1.png', 'FecaM.jpg', 20, 6, '2019-02-05 14:48:13'),
+(2, 'Zetrox', '21232f297a57a5a743894a0e4a801fc3', 'Nidas', 'null.png', 'SramM.jpg', 7, 2, '2019-06-15 00:00:00');
 
 -- --------------------------------------------------------
 
